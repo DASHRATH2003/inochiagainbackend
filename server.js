@@ -8,16 +8,14 @@ const app = express();
 // Parse JSON requests
 app.use(express.json());
 
-// ✅ CORS setup for frontend on localhost:3000
-const corsOptions = {
-  origin: ['http://localhost:3000'],
+// ✅ CORS Middleware (updated)
+app.use(cors({
+  origin: ['http://localhost:3000', 'https://frontendinnomatrics.vercel.app', 'https://www.inochiinternational.in', 'https://inochimain.vercel.app'],
   methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type'],
-  credentials: true
-};
-
-app.use(cors(corsOptions));
-app.options('*', cors(corsOptions)); // Preflight support
+  allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept'],
+  credentials: true,
+  optionsSuccessStatus: 200
+}));
 
 // ✅ Nodemailer transporter setup (Zoho example)
 const transporter = nodemailer.createTransport({
