@@ -1,6 +1,7 @@
 const express = require('express');
 const nodemailer = require('nodemailer');
 const cors = require('cors');
+const { sendTelegramMessage } = require('./telegramConfig');
 require('dotenv').config();
 
 const app = express();
@@ -84,7 +85,7 @@ app.post('/api/send-email', async (req, res) => {
   }
 });
 
-// ✅ Chat endpoint
+// ✅ Chat endpoint with Telegram notification
 app.post('/api/chat', async (req, res) => {
   try {
     console.log('Received chat message:', req.body);
@@ -96,6 +97,17 @@ app.post('/api/chat', async (req, res) => {
       });
     }
 
+    // Send Telegram notification
+    const telegramMessage = `
+🗨️ <b>New Chat Message</b>
+
+Message: ${message}
+
+Time: ${new Date().toLocaleString()}
+`;
+    
+    await sendTelegramMessage(telegramMessage);
+
     // Convert message to lowercase for matching
     const lowerMessage = message.toLowerCase();
 
@@ -106,13 +118,13 @@ app.post('/api/chat', async (req, res) => {
       reply = 'Hello! How can I assist you with our spice products today?';
     }
     else if (lowerMessage.includes('price') || lowerMessage.includes('cost') || lowerMessage.includes('rate')) {
-      reply = 'For detailed pricing information of our spices, please email us at vijayakumar@inochiinternational.in or call us at +919535520948';
+      reply = 'For detailed pricing information of our spices, please email us at vijaykumar@inochiinternational.in or call us at +919535520948';
     }
     else if (lowerMessage.includes('product') || lowerMessage.includes('spice') || lowerMessage.includes('items')) {
       reply = 'We offer a wide range of premium spices including:\n- Black Pepper\n- Cardamom\n- Cinnamon\n- Cloves\n- Turmeric\nand many more. Which spice would you like to know more about?';
     }
     else if (lowerMessage.includes('contact') || lowerMessage.includes('reach') || lowerMessage.includes('call')) {
-      reply = 'You can reach us through:\nEmail: vijayakumar@inochiinternational.in\nPhone: +919535520948\nWe typically respond within 24 hours.';
+      reply = 'You can reach us through:\nEmail: vijaykumar@inochiinternational.in\nPhone: +919535520948\nWe typically respond within 24 hours.';
     }
     else if (lowerMessage.includes('location') || lowerMessage.includes('address') || lowerMessage.includes('where')) {
       reply = 'We are headquartered in India and serve customers globally. For our detailed address, please contact our team.';
@@ -124,7 +136,7 @@ app.post('/api/chat', async (req, res) => {
       reply = 'We maintain the highest quality standards with certifications including:\n- ISO Certification\n- FSSAI Registration\n- Export License\nAll our products undergo strict quality control measures.';
     }
     else {
-      reply = 'Thank you for your message. For specific information about our spices or business inquiries, please contact our team at vijayakumar@inochiinternational.in or call +919535520948';
+      reply = 'Thank you for your message. For specific information about our spices or business inquiries, please contact our team at vijaykumar@inochiinternational.in or call +919535520948';
     }
 
     console.log('Sending reply:', reply);
@@ -134,6 +146,24 @@ app.post('/api/chat', async (req, res) => {
     res.status(500).json({ 
       reply: 'I apologize, but I\'m having technical difficulties. Please try again later.' 
     });
+  }
+});
+
+// ✅ Test route for Telegram
+app.get('/test-telegram', async (req, res) => {
+  try {
+    const testMessage = `
+🔔 <b>Test Notification</b>
+
+This is a test message from your website chat system.
+Time: ${new Date().toLocaleString()}
+`;
+    
+    const result = await sendTelegramMessage(testMessage);
+    res.json({ success: true, message: 'Test notification sent!', result });
+  } catch (error) {
+    console.error('Test notification error:', error);
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 
